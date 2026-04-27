@@ -9,7 +9,10 @@ app.get('/', (req, res) => {
 })
 
 const users = []
-// list
+// list​​​​​​​​ //
+// app.get('/users', (req, res) => {
+//   res.send(users)
+// })
 app.get("/users", (req, res) => {
   db.query("SELECT * FROM users", (err, result) => {
     if (err) {
@@ -19,7 +22,15 @@ app.get("/users", (req, res) => {
   });
 });
 
-// create
+// create //
+// app.post('/users', (req, res) => {
+//   const user = {
+//     id: Date.now(),
+//     name: req.body.name
+//   }
+//   users.push(user)
+//   res.status(201).send(user)
+// })
 app.post("/users", (req, res) => {
   const { name } = req.body;
 
@@ -35,7 +46,7 @@ app.post("/users", (req, res) => {
   );
 });
 
-// update
+// update //
 // app.put('/users/:id', (req, res) => {
 //   const id = parseInt(req.params.id);
 //   const user = users.find(u => u.id === id)
@@ -67,7 +78,17 @@ app.put("/users/:id", (req, res) => {
 });
 
 
-// delete
+// delete //
+// app.delete('/users/:id', (req, res) => {
+//   const id = parseInt(req.params.id);
+//   const index = users.findIndex(u => u.id === id);
+//   console.log(index);
+//   if (index === -1) {
+//     return res.status(500).json({ message: 'User not found' });
+//   }
+//   users.splice(index, 1);
+//   res.send({ message: 'User deleted successfully' });
+// })
 app.delete("/users/:id", (req, res) => {
   const id = req.params.id;
 
