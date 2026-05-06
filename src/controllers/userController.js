@@ -1,53 +1,71 @@
-// src/controllers/userController.js
-import * as userService from '../services/userService.js';
-
-export const getUsers = async (req, res) => {
-  try {
-    const users = await userService.fetchAllUsers();
-    res.status(200).json(users);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-export const getUser = async (req, res) => {
-  try {
-    const user = await userService.fetchUserById(req.params.id);
-    if (!user) return res.status(404).json({ message: 'User not found' });
-    res.status(200).json(user);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-export const createUser = async (req, res) => {
-  try {
-    const newUserId = await userService.createNewUser(req.body);
-    res.status(201).json({ id: newUserId, ...req.body });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
-
-export const updateUser = async (req, res) => {
-  try { 
-    const updatedUserId = await userService.updateUser(req.params.id, req.body);
-    res.status(200).json({ id: updatedUserId, ...req.body });
-  } catch (error){
-    res.status(400).json({ message: error.message });
-  }
-  }
-
-export const deleteUser = async (req, res) => {
-  try {
-    const deletedUser = await userService.deleteUser(req.params.id);
-
-    if (!deletedUser) {
-      return res.status(404).json({ message: 'User not found' });
+import UserModel from "../models/UserModel.js";
+import BaseController from "./BaseController.js";
+export class UserController extends BaseController {
+  async getAllUsers(req, res) {
+        try {
+            const users = await UserModel.getAll();
+            await BaseController.success(res, 'Users are gotten successfully', users);
+        } catch (error) {
+            console.error(error);
+            await BaseController.error(res, 'Server Error', 500);
+        }
     }
 
-    res.status(200).json({ message: 'User deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  async getOneUser (req, res) {
+      try {
+          const { id } = req.params;
+          const user = await UserModel.getUserById(id);
+          if (!user) {
+              return await BaseController.error(res, 'User not found', 404);
+          }
+          await BaseController.success(res, 'User is retrieved successfully', user);
+      } catch (error) {
+          console.error(error);
+          await BaseController.error(res, 'Server Error', 500);
+      }
   }
-};
+
+  async create(req, res) {
+    try {
+      const userData = req.body;
+      const result = await UserModel.createUser(userData);
+      const createdUser = { id: result.insertId, ...userData };
+      await BaseController.success(res, "User is created successfully", createdUser, 201);
+    } catch (error) {
+      console.error(error);
+      await BaseController.error(res, error || 'Server Error', 500);
+    }
+  }
+
+  async update(req, res) {
+    try{
+      const { id } = req.params;
+      const userData = { id: Number(id), ...req.body };
+      const result = await UserModel.updateUser(userData);
+      if (result.affectedRows === 0) {
+        return await BaseController.error(res, 'User not found to update', 404);
+      }
+      
+      await BaseController.success(res, "User is changed successfully", userData);
+    } catch (error) {
+      console.error(error);
+      await BaseController.error(res, error || 'Server Error', 500);
+    }
+  }
+
+  async delete(req, res) {
+    try {
+      const { id } = req.params;
+      const user = await UserModel.getUserById(id);
+      if (!user) {
+        return await BaseController.error(res, 'User not found to delete', 404);
+      }
+      await UserModel.deleteUser(id);
+      await BaseController.success(res, "User is deleted successfully", user);
+    } catch (error) {
+      console.error(error);
+      await BaseController.error(res, error || 'Server Error', 500);
+    }
+  }
+}
+

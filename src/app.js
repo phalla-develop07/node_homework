@@ -1,14 +1,12 @@
-// src/app.js
-import express from 'express';
-import userRoutes from './routes/userRoutes.js';
+import express from "express";
+import UserRoutes from "./routes/UserRoutes.js";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-app.use(express.json()); // Middleware to parse JSON bodies
+app.use(express.json());
 
-app.use('/api/users', userRoutes);
+app.use("/users", UserRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(3000, () => {
+  console.log("Server running on port http://localhost:3000");
 });

@@ -1,32 +1,36 @@
-// src/models/userModel.js
-import db from '../config/db.js';
+import BaseModel from "./BaseModel.js";
+import db from "../config/db.js";
 
-export const getAllUsers = async () => {
-  const [rows] = await db.query('SELECT * FROM users');
-  return rows;
-};
+class UserModel extends BaseModel {
 
-export const getUserById = async (id) => {
-  const [rows] = await db.query('SELECT * FROM users WHERE id = ?', [id]);
-  return rows[0];
-};
+  static async getAll() {
+    const result = await this.query(`SELECT * FROM users`);
+    return result;
+  }
 
-export const createUser = async (userData) => {
-  const { name, age, email, class:userClass } = userData;
-  const [result] = await db.query('INSERT INTO users (name, age, email, class) VALUES (?, ?, ?, ?)', [name, age, email, userClass]);
-  return result.insertId;
-};
+  static async getUserById(id) {
+    const result = await this.query(`SELECT * FROM users WHERE id = ?`,[id]);
+    return result[0];
+  }
 
-export const updateUser = async (id, userData) => {
-  const { name, age, email, class:userClass } = userData;
-  await db.query('UPDATE users SET name = ?, age = ?, email = ?, class = ? WHERE id = ?', [name, age, email, userClass, id]);
-  return id;
-};
+  static async createUser(data) {
+    const { name, age, email, class: className}= data;
+    const result = await this.query("INSERT INTO users (name, age, email, class) VALUES (?, ?, ?, ?)", [name, age, email, className]);
+    return result;
+  }
 
-export const deleteUser = async (id) => {
-  const [result] = await db.execute(
-    'DELETE FROM users WHERE id = ?',
-    [id]
-  );
-  return result.affectedRows;
-};
+  static async updateUser(data) {
+    const { id, name, age, email, class: className } = data;
+    const result = await this.query(`UPDATE users SET name = ?, age = ?, email = ?, class = ? WHERE id = ?`,
+      [name, age, email, className, id]);
+    return result;
+  }
+
+  static async deleteUser(id){
+    const result = await this.query(`DELETE FROM users WHERE id = ?`, [id]);
+    return result;
+  }
+
+}
+
+export default UserModel;
