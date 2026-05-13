@@ -1,71 +1,34 @@
-import UserModel from "../models/UserModel.js";
+import UserService from "../services/UserService.js";
 import BaseController from "./BaseController.js";
 export class UserController extends BaseController {
   async getAllUsers(req, res) {
-        try {
-            const users = await UserModel.getAll();
-            await BaseController.success(res, 'Users are gotten successfully', users);
-        } catch (error) {
-            console.error(error);
-            await BaseController.error(res, 'Server Error', 500);
-        }
-    }
+      const users = await UserService.getAllUsers();
+      await BaseController.success(res, 'Users are gotten successfully', users);
+  }
 
-  async getOneUser (req, res) {
-      try {
-          const { id } = req.params;
-          const user = await UserModel.getUserById(id);
-          if (!user) {
-              return await BaseController.error(res, 'User not found', 404);
-          }
-          await BaseController.success(res, 'User is retrieved successfully', user);
-      } catch (error) {
-          console.error(error);
-          await BaseController.error(res, 'Server Error', 500);
-      }
+  async getOneUser(req, res) {
+      const { id } = req.params;
+      const user = await UserService.getUserById(id);
+      await BaseController.success(res, 'User is retrieved successfully', user);
   }
 
   async create(req, res) {
-    try {
       const userData = req.body;
-      const result = await UserModel.createUser(userData);
-      const createdUser = { id: result.insertId, ...userData };
+      const createdUser = await UserService.createUser(userData);
       await BaseController.success(res, "User is created successfully", createdUser, 201);
-    } catch (error) {
-      console.error(error);
-      await BaseController.error(res, error || 'Server Error', 500);
-    }
   }
 
   async update(req, res) {
-    try{
       const { id } = req.params;
       const userData = { id: Number(id), ...req.body };
-      const result = await UserModel.updateUser(userData);
-      if (result.affectedRows === 0) {
-        return await BaseController.error(res, 'User not found to update', 404);
-      }
-      
-      await BaseController.success(res, "User is changed successfully", userData);
-    } catch (error) {
-      console.error(error);
-      await BaseController.error(res, error || 'Server Error', 500);
-    }
+      const updatedUser = await UserService.updateUser(userData);
+      await BaseController.success(res, "User is changed successfully", updatedUser);
   }
 
   async delete(req, res) {
-    try {
       const { id } = req.params;
-      const user = await UserModel.getUserById(id);
-      if (!user) {
-        return await BaseController.error(res, 'User not found to delete', 404);
-      }
-      await UserModel.deleteUser(id);
+      const user = await UserService.deleteUser(id);
       await BaseController.success(res, "User is deleted successfully", user);
-    } catch (error) {
-      console.error(error);
-      await BaseController.error(res, error || 'Server Error', 500);
-    }
   }
 }
 
